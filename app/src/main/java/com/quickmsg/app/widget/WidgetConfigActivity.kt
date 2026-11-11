@@ -36,6 +36,8 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,6 +48,8 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -164,6 +168,7 @@ fun WidgetConfigScreen(
     }
     var selectedColor by remember { mutableStateOf(existing?.colorHex ?: "#25D366") }
     var selectedSize by remember { mutableStateOf(existing?.widgetSize ?: "medium") }
+    var chatOnly by remember { mutableStateOf(existing?.chatOnly ?: false) }
     var showPresets by remember { mutableStateOf(false) }
     var newMessage by remember { mutableStateOf("") }
 
@@ -293,7 +298,50 @@ fun WidgetConfigScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // ---- MODE SECTION ----
+        Text("Widget Mode", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (chatOnly) Color(0xFF25D366).copy(alpha = 0.08f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        if (chatOnly) "Open Chat Only" else "Send Message",
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        if (chatOnly) "Opens WhatsApp chat without sending"
+                        else "Sends a message automatically",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = chatOnly,
+                    onCheckedChange = { chatOnly = it },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = Color(0xFF25D366)
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         // ---- MESSAGES SECTION ----
+        if (!chatOnly) {
         Text("Messages", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -405,6 +453,8 @@ fun WidgetConfigScreen(
             }
         }
 
+        } // end if (!chatOnly)
+
         Spacer(modifier = Modifier.height(20.dp))
 
         // ---- SIZE SECTION ----
@@ -473,17 +523,19 @@ fun WidgetConfigScreen(
 
         Button(
             onClick = {
-                if (label.isNotBlank() && contactPhone.isNotBlank() && primaryMessage.isNotBlank()) {
+                val canSave = label.isNotBlank() && contactPhone.isNotBlank() && (chatOnly || primaryMessage.isNotBlank())
+                if (canSave) {
                     onSave(
                         WidgetConfig(
                             widgetId = 0,
                             contactName = contactName,
                             contactPhone = contactPhone,
-                            message = primaryMessage,
-                            messages = additionalMessages.toList(),
+                            message = if (chatOnly) "" else primaryMessage,
+                            messages = if (chatOnly) emptyList() else additionalMessages.toList(),
                             label = label,
                             colorHex = selectedColor,
-                            widgetSize = selectedSize
+                            widgetSize = selectedSize,
+                            chatOnly = chatOnly
                         )
                     )
                 }
@@ -499,7 +551,7 @@ fun WidgetConfigScreen(
                 }
             ),
             shape = RoundedCornerShape(12.dp),
-            enabled = label.isNotBlank() && contactPhone.isNotBlank() && primaryMessage.isNotBlank()
+            enabled = label.isNotBlank() && contactPhone.isNotBlank() && (chatOnly || primaryMessage.isNotBlank())
         ) {
             Text("Save Widget", color = Color.White)
         }

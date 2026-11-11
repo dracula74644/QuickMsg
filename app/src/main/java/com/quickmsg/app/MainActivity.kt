@@ -154,6 +154,12 @@ fun AppRoot() {
                 partnerName = name
                 partnerPhone = phone
             },
+            onDeletePartner = {
+                partnerPrefs.clear()
+                partnerName = ""
+                partnerPhone = ""
+                isSetUp = false
+            },
             onPickContact = {
                 permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
             },
@@ -168,6 +174,7 @@ fun MainApp(
     partnerName: String,
     partnerPhone: String,
     onEditPartner: (String, String) -> Unit,
+    onDeletePartner: () -> Unit,
     onPickContact: () -> Unit,
     pendingContactName: String,
     pendingContactPhone: String
@@ -216,6 +223,10 @@ fun MainApp(
                     lastMessage = null,
                     lastTime = null,
                     onEditPartner = { selectedTab = 3 },
+                    onDeletePartner = onDeletePartner,
+                    onOpenChat = {
+                        MessageSender.openChat(context, partnerPhone)
+                    },
                     onSend = { message ->
                         val processed = TemplateProcessor.process(message)
                         CoroutineScope(Dispatchers.IO).launch {
@@ -232,6 +243,11 @@ fun MainApp(
                             putExtra("EDIT_WIDGET_ID", widgetId)
                         }
                         context.startActivity(intent)
+                    },
+                    onDeleteWidget = { widgetId ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            repo.delete(widgetId)
+                        }
                     }
                 )
                 2 -> HistoryScreen(
@@ -246,7 +262,11 @@ fun MainApp(
                     partnerName = partnerName,
                     partnerPhone = partnerPhone,
                     accessibilityEnabled = MessageSender.isAccessibilityServiceEnabled(context),
-                    onEditPartner = { selectedTab = 3 },
+                    onEditPartner = onEditPartner,
+                    onDeletePartner = onDeletePartner,
+                    onPickContact = onPickContact,
+                    pendingContactName = pendingContactName,
+                    pendingContactPhone = pendingContactPhone,
                     onEnableAccessibility = {
                         MessageSender.openAccessibilitySettings(context)
                     }

@@ -41,7 +41,10 @@ class WidgetClickActivity : ComponentActivity() {
                 return@launch
             }
 
-            if (pickMessage && config.messages.isNotEmpty()) {
+            if (config.chatOnly) {
+                MessageSender.openChat(activity, config.contactPhone)
+                finish()
+            } else if (pickMessage && config.messages.isNotEmpty()) {
                 val pickerIntent = android.content.Intent(activity, MessagePickerActivity::class.java).apply {
                     putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                 }

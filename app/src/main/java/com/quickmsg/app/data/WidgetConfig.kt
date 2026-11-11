@@ -12,5 +12,6 @@ data class WidgetConfig(
     val messages: List<String> = emptyList(),
     val label: String,
     val colorHex: String = "#25D366",
-    val widgetSize: String = "medium"
+    val widgetSize: String = "medium",
+    val chatOnly: Boolean = false
 )

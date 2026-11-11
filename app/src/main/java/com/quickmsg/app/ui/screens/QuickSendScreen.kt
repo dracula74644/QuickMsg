@@ -25,6 +25,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Schedule
@@ -62,6 +64,8 @@ fun QuickSendScreen(
     lastMessage: String?,
     lastTime: String?,
     onEditPartner: () -> Unit,
+    onDeletePartner: () -> Unit,
+    onOpenChat: () -> Unit,
     onSend: (String) -> Unit
 ) {
     var selectedCategory by remember { mutableStateOf("Status") }
@@ -125,11 +129,25 @@ fun QuickSendScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                IconButton(onClick = onOpenChat) {
+                    Icon(
+                        Icons.Default.Chat,
+                        contentDescription = "Open chat",
+                        tint = Color(0xFF25D366)
+                    )
+                }
                 IconButton(onClick = onEditPartner) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Edit partner",
+                        contentDescription = "Edit contact",
                         tint = Color(0xFFE91E63)
+                    )
+                }
+                IconButton(onClick = onDeletePartner) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete contact",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }

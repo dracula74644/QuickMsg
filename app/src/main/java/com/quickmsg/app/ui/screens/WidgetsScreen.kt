@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Button
@@ -40,7 +41,8 @@ import com.quickmsg.app.data.WidgetConfig
 fun WidgetsScreen(
     widgets: List<WidgetConfig>,
     onAddWidget: () -> Unit,
-    onEditWidget: (Int) -> Unit
+    onEditWidget: (Int) -> Unit,
+    onDeleteWidget: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -139,17 +141,20 @@ fun WidgetsScreen(
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
-                                    "${widget.contactName} • ${widget.message.take(25)}",
+                                    if (widget.chatOnly) "${widget.contactName} • Open chat"
+                                    else "${widget.contactName} • ${widget.message.take(25)}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                val msgCount = widget.messages.size + 1
-                                if (msgCount > 1) {
-                                    Text(
-                                        "$msgCount messages • ${widget.widgetSize}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = bgColor
-                                    )
+                                if (!widget.chatOnly) {
+                                    val msgCount = widget.messages.size + 1
+                                    if (msgCount > 1) {
+                                        Text(
+                                            "$msgCount messages • ${widget.widgetSize}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = bgColor
+                                        )
+                                    }
                                 }
                             }
                             IconButton(onClick = { onEditWidget(widget.widgetId) }) {
@@ -157,6 +162,13 @@ fun WidgetsScreen(
                                     Icons.Default.Edit,
                                     contentDescription = "Edit",
                                     tint = bgColor
+                                )
+                            }
+                            IconButton(onClick = { onDeleteWidget(widget.widgetId) }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = MaterialTheme.colorScheme.error
                                 )
                             }
                         }

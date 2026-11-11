@@ -44,6 +44,20 @@ object MessageSender {
         }
     }
 
+    fun openChat(context: Context, phoneNumber: String) {
+        val cleanNumber = phoneNumber.replace("[^0-9+]".toRegex(), "")
+        val uri = Uri.parse("https://api.whatsapp.com/send?phone=$cleanNumber")
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.whatsapp")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(context, "WhatsApp not installed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun isAccessibilityServiceEnabled(context: Context): Boolean {
         val serviceName =
             "${context.packageName}/${WhatsAppAccessibilityService::class.java.canonicalName}"

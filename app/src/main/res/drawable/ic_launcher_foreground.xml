@@ -4,11 +4,12 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Chat bubble with lightning bolt -->
+    <!-- Chat bubble -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M54,28C38.5,28 26,38.7 26,52C26,57.8 28.3,63 32.2,67.1L29,78L41.2,73.5C44.8,75.1 49.2,76 54,76C69.5,76 82,65.3 82,52C82,38.7 69.5,28 54,28Z" />
+    <!-- Heart -->
     <path
         android:fillColor="#25D366"
-        android:pathData="M50,44L58,52L50,60L54,60L62,52L54,44Z" />
+        android:pathData="M54,63 L42.5,52.5 C39.5,49.5 39.5,44.8 42.5,41.8 C45.5,38.8 50.2,38.8 53.2,41.8 L54,42.6 L54.8,41.8 C57.8,38.8 62.5,38.8 65.5,41.8 C68.5,44.8 68.5,49.5 65.5,52.5 Z" />
 </vector>

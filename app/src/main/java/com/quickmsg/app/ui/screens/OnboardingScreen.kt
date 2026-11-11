@@ -3,7 +3,9 @@ package com.quickmsg.app.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -88,7 +90,7 @@ fun OnboardingScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Quick updates to your favorite person",
+                    text = "Quick updates to your loved ones",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -127,7 +129,7 @@ fun OnboardingScreen(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Partner's Name") },
+                    label = { Text("Your Loved One's Name") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
@@ -166,7 +168,28 @@ fun OnboardingScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.weight(1f))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Made By Dracula",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Icon(
+                        Icons.Default.Favorite,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = Color(0xFFE91E63)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

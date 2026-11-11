@@ -15,18 +15,28 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Contacts
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,9 +48,15 @@ fun SettingsScreen(
     partnerName: String,
     partnerPhone: String,
     accessibilityEnabled: Boolean,
-    onEditPartner: () -> Unit,
+    onEditPartner: (String, String) -> Unit,
+    onDeletePartner: () -> Unit,
+    onPickContact: () -> Unit,
+    pendingContactName: String,
+    pendingContactPhone: String,
     onEnableAccessibility: () -> Unit
 ) {
+    var showEditDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,7 +65,7 @@ fun SettingsScreen(
     ) {
         // Partner section
         Text(
-            "Partner",
+            "Your Loved One",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -84,11 +100,18 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = onEditPartner) {
+                IconButton(onClick = { showEditDialog = true }) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Edit partner",
+                        contentDescription = "Edit contact",
                         tint = Color(0xFFE91E63)
+                    )
+                }
+                IconButton(onClick = onDeletePartner) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete contact",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
@@ -192,7 +215,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        "Send quick WhatsApp updates to your partner with one tap from your home screen.",
+                        "Send quick WhatsApp updates to your loved ones with one tap from your home screen.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -200,4 +223,84 @@ fun SettingsScreen(
             }
         }
     }
+
+    if (showEditDialog) {
+        EditPartnerDialog(
+            initialName = partnerName,
+            initialPhone = partnerPhone,
+            pendingContactName = pendingContactName,
+            pendingContactPhone = pendingContactPhone,
+            onPickContact = onPickContact,
+            onDismiss = { showEditDialog = false },
+            onSave = { name, phone ->
+                onEditPartner(name, phone)
+                showEditDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun EditPartnerDialog(
+    initialName: String,
+    initialPhone: String,
+    pendingContactName: String,
+    pendingContactPhone: String,
+    onPickContact: () -> Unit,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var phone by remember { mutableStateOf(initialPhone) }
+
+    LaunchedEffect(pendingContactName, pendingContactPhone) {
+        if (pendingContactName.isNotBlank()) name = pendingContactName
+        if (pendingContactPhone.isNotBlank()) phone = pendingContactPhone
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Your Loved One") },
+        text = {
+            Column {
+                OutlinedButton(
+                    onClick = onPickContact,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Contacts, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Pick from Contacts")
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Phone (with country code)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(name, phone) },
+                enabled = name.isNotBlank() && phone.isNotBlank()
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

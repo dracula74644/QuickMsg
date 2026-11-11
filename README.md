@@ -2,7 +2,7 @@
 
 **One-tap WhatsApp messages from your home screen.**
 
-QuickMsg lets you send pre-configured WhatsApp messages to your partner or contacts with a single tap — no typing, no opening WhatsApp manually.
+QuickMsg lets you send pre-configured WhatsApp messages to your loved ones with a single tap — no typing, no opening WhatsApp manually.
 
 ## Features
 
@@ -17,7 +17,7 @@ QuickMsg lets you send pre-configured WhatsApp messages to your partner or conta
 
 ## How It Works
 
-1. Set up your partner's name and phone number on first launch
+1. Set up your loved one's name and phone number on first launch
 2. Tap any message card in the app to send it instantly
 3. Add home screen widgets for your most-used messages
 4. The app briefly opens WhatsApp, auto-taps send, and returns — all in under 2 seconds
