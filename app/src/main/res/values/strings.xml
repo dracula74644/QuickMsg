@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QuickMsg</string>
+    <string name="widget_description">One-tap WhatsApp message widget</string>
+    <string name="accessibility_service_description">QuickMsg uses this service to automatically tap the Send button in WhatsApp after opening a chat with your pre-configured message. This allows one-tap messaging from your home screen widgets.</string>
+</resources>
