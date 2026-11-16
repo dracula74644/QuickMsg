@@ -1,13 +1,24 @@
 package com.quickmsg.app.service
 
 import android.content.Context
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 
 object MessageSender {
 
     fun sendWhatsAppMessage(context: Context, phoneNumber: String, message: String) {
+        // Widget receivers can call from an IO coroutine; Toast and navigation
+        // must run on the main thread, including the disabled-service path.
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Handler(Looper.getMainLooper()).post {
+                sendWhatsAppMessage(context, phoneNumber, message)
+            }
+            return
+        }
         val cleanNumber = phoneNumber.replace("[^0-9+]".toRegex(), "")
         val processedMessage = TemplateProcessor.process(message)
 
@@ -59,13 +70,14 @@ object MessageSender {
     }
 
     fun isAccessibilityServiceEnabled(context: Context): Boolean {
-        val serviceName =
-            "${context.packageName}/${WhatsAppAccessibilityService::class.java.canonicalName}"
+        val serviceName = ComponentName(context, WhatsAppAccessibilityService::class.java)
         val enabledServices = android.provider.Settings.Secure.getString(
             context.contentResolver,
             android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: return false
-        return enabledServices.contains(serviceName)
+        return enabledServices.split(':').any {
+            ComponentName.unflattenFromString(it) == serviceName
+        }
     }
 
     fun openAccessibilitySettings(context: Context) {

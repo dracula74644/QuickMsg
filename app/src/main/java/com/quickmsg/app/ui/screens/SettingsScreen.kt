@@ -42,6 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import android.provider.Settings
 
 @Composable
 fun SettingsScreen(
@@ -55,6 +58,8 @@ fun SettingsScreen(
     pendingContactPhone: String,
     onEnableAccessibility: () -> Unit
 ) {
+    val context = LocalContext.current
+    val appVersion = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName }
     var showEditDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -177,7 +182,22 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        OutlinedButton(onClick = {
+            context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            })
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("Manage auto-send notifications")
+        }
+        Text(
+            "Allow notifications to get an alert if accessibility turns off. Background alerts may be delayed by battery restrictions.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+
         // App info
+        UpdateSettings()
         Text(
             "About",
             style = MaterialTheme.typography.titleSmall,
@@ -209,7 +229,7 @@ fun SettingsScreen(
                 Column {
                     Text("QuickMsg", fontWeight = FontWeight.Medium)
                     Text(
-                        "Version 1.0",
+                        "Version $appVersion",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

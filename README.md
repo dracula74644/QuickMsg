@@ -26,40 +26,15 @@ QuickMsg lets you send pre-configured WhatsApp messages to your loved ones with 
 
 📥 **[Download Latest APK](../../releases/latest)**
 
-## Installation Guide
+## Installation and updates
 
-Since this app uses Android's Accessibility Service for auto-sending (the same mechanism used by Tasker, MacroDroid, and other automation apps), Google Play Protect may block the installation. This is normal for any app that uses accessibility services outside the Play Store.
+Download the APK from [the latest release](https://github.com/dracula74644/QuickMsg/releases/latest) and install it over the existing app to keep your data. Do not uninstall first. Enable QuickMsg in Android Accessibility settings for automatic sending.
 
-### Step-by-step install:
+Starting with version 1.2, QuickMsg checks the latest GitHub release when opened (at most once per hour) and approximately every six hours in the background. A newer release shows a Download banner; background checks can also show a notification if notifications are allowed. Settings includes a manual update check. Android may delay background checks. The app opens the release APK in your browser; you approve downloading and installation. Versions before 1.2 need one manual update to gain this feature.
 
-1. **Download** the APK from the [Releases](../../releases/latest) page
+If Play Protect blocks an APK, record the exact warning and report it to the maintainer. A scan request, sensitive-permission block, and harmful-app classification have different remedies. See [Google’s guidance and appeal process](https://developers.google.com/android/play-protect/warning-dev-guidance). Disabling Play Protect is not the recommended installation procedure.
 
-2. **Temporarily pause Play Protect:**
-   - Open the **Google Play Store** app
-   - Tap your **profile icon** (top right)
-   - Tap **Play Protect**
-   - Tap the **⚙️ Settings gear** (top right)
-   - Turn off **"Scan apps with Play Protect"**
-   - Confirm by tapping **"Turn off"**
-
-3. **Install the APK:**
-   - Open the downloaded `QuickMsg.apk` file
-   - Tap **"Install"**
-   - If prompted about unknown sources, tap **"Settings"** and enable **"Allow from this source"**
-
-4. **Re-enable Play Protect:**
-   - Go back to Play Store → Profile → Play Protect → Settings
-   - Turn **"Scan apps with Play Protect"** back on
-
-5. **Enable the Accessibility Service:**
-   - Open QuickMsg
-   - Tap **"Enable"** on the auto-send card
-   - Find **"QuickMsg"** in the accessibility list
-   - Toggle it **on** and confirm
-
-### Why does Play Protect block it?
-
-Play Protect flags apps that use Android's Accessibility Service when installed outside the Play Store. This is a security precaution — accessibility services can interact with other apps, so Google is cautious. QuickMsg only uses this permission to tap WhatsApp's send button automatically. The app does not collect, store, or transmit any personal data.
+QuickMsg stores your selected contact, widget configurations, and message history locally. Its accessibility service inspects WhatsApp’s interface to find and activate Send. Update checks connect to GitHub; they do not upload contacts or message history.
 
 ## Permissions
 
@@ -67,12 +42,13 @@ Play Protect flags apps that use Android's Accessibility Service when installed 
 |---|---|
 | **Accessibility Service** | Auto-taps WhatsApp's send button so you don't have to |
 | **Read Contacts** | Optional — lets you pick contacts from your address book |
-| **Internet** | Required by WhatsApp deep links |
+| **Internet** | Checks GitHub for app updates |
+| **Notifications** | Alerts when accessibility turns off or an update is available |
 
 ## Building from Source
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/QuickMsg.git
+git clone https://github.com/dracula74644/QuickMsg.git
 cd QuickMsg
 ```
 
@@ -84,6 +60,18 @@ export ANDROID_HOME=~/Android/Sdk
 ```
 
 APK output: `app/build/outputs/apk/release/app-release.apk`
+
+## Publishing an update
+
+A source commit alone does not notify users. Publish a stable GitHub Release with both its signed APK and `update.json`:
+
+1. Increase `versionCode` and `versionName` in `app/build.gradle.kts`.
+2. Keep the existing release signing key; a different key cannot update existing installations normally.
+3. Run `./gradlew testDebugUnitTest assembleRelease`, then `python3 tools/prepare_release.py`.
+4. Commit and push the source. Create a draft release tagged `v<version>` at that commit and upload both files from `build/release/v<version>/`.
+5. Publish the draft as the latest stable release only after both assets finish uploading.
+
+The app reads `https://github.com/dracula74644/QuickMsg/releases/latest/download/update.json`, compares the numeric `versionCode`, and offers only newer versions. Do not replace an old release with different contents or reuse its version code. The manifest includes the APK SHA-256 for external verification; the app delegates downloading and installation to the browser and Android installer.
 
 ## Tech Stack
 

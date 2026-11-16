@@ -2,6 +2,7 @@ package com.quickmsg.app.service
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
@@ -31,6 +32,15 @@ class WhatsAppAccessibilityService : AccessibilityService() {
                     AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS
         }
         serviceInfo = info
+        AccessibilityAlerts.check(this)
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        pendingSend.set(false)
+        retryCount.set(0)
+        handler.removeCallbacksAndMessages(null)
+        AccessibilityAlerts.check(this)
+        return super.onUnbind(intent)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -72,9 +82,10 @@ class WhatsAppAccessibilityService : AccessibilityService() {
 
     private fun findAndClickSend(root: AccessibilityNodeInfo): Boolean {
         val sendButtons = root.findAccessibilityNodeInfosByViewId("com.whatsapp:id/send")
-        if (sendButtons.isNotEmpty()) {
-            sendButtons[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            return true
+        for (button in sendButtons) {
+            if (button.isEnabled && button.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                return true
+            }
         }
 
         return findNodeByContentDescription(root, "Send")
@@ -85,8 +96,9 @@ class WhatsAppAccessibilityService : AccessibilityService() {
         description: String
     ): Boolean {
         if (node.contentDescription?.toString()?.equals(description, ignoreCase = true) == true) {
-            node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            return true
+            if (node.isEnabled && node.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                return true
+            }
         }
         for (i in 0 until node.childCount) {
             val child = node.getChild(i) ?: continue

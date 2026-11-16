@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.quickmsg.app.data.QuickMessages
 import com.quickmsg.app.data.WidgetConfig
+import com.quickmsg.app.data.PartnerPrefs
 import com.quickmsg.app.data.WidgetRepository
 import com.quickmsg.app.service.TemplateProcessor
 import com.quickmsg.app.ui.theme.QuickMsgTheme
@@ -157,9 +158,10 @@ fun WidgetConfigScreen(
     onSave: (WidgetConfig) -> Unit
 ) {
     val context = LocalContext.current
-    var label by remember { mutableStateOf(existing?.label ?: "") }
-    var contactName by remember { mutableStateOf(existing?.contactName ?: "") }
-    var contactPhone by remember { mutableStateOf(existing?.contactPhone ?: "") }
+    val defaultContact = remember { PartnerPrefs(context).get() }
+    var label by remember { mutableStateOf(existing?.label ?: defaultContact.name) }
+    var contactName by remember { mutableStateOf(existing?.contactName ?: defaultContact.name) }
+    var contactPhone by remember { mutableStateOf(existing?.contactPhone ?: defaultContact.phone) }
     var primaryMessage by remember { mutableStateOf(existing?.message ?: "") }
     val additionalMessages = remember {
         mutableStateListOf<String>().apply {

@@ -5,11 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [WidgetConfig::class, SentMessage::class],
     version = 4,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -17,6 +19,12 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun sentMessageDao(): SentMessageDao
 
     companion object {
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE widget_configs ADD COLUMN chatOnly INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -26,7 +34,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "quickmsg_db"
-                ).fallbackToDestructiveMigration().build()
+                ).addMigrations(MIGRATION_3_4).build()
                 INSTANCE = instance
                 instance
             }

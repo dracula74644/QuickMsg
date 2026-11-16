@@ -6,8 +6,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Build
+import android.content.pm.PackageManager
+import android.app.AlertDialog
 import android.provider.ContactsContract
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
+import com.quickmsg.app.service.AppUpdates
+import com.quickmsg.app.ui.screens.UpdateBanner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.quickmsg.app.data.PartnerPrefs
 import com.quickmsg.app.data.WidgetRepository
 import com.quickmsg.app.service.MessageSender
+import com.quickmsg.app.service.AccessibilityAlerts
 import com.quickmsg.app.service.TemplateProcessor
 import com.quickmsg.app.ui.screens.HistoryScreen
 import com.quickmsg.app.ui.screens.OnboardingScreen
@@ -66,6 +73,39 @@ data class NavItem(
 )
 
 class MainActivity : ComponentActivity() {
+    private val notificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { AccessibilityAlerts.check(this) }
+
+    override fun onResume() {
+        super.onResume()
+        AccessibilityAlerts.check(this)
+        lifecycleScope.launch {
+            try {
+                AppUpdates.check(this@MainActivity)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Offline startup should not interrupt messaging.
+            }
+        }
+        val prefs = getSharedPreferences("accessibility_alerts", Context.MODE_PRIVATE)
+        if (Build.VERSION.SDK_INT >= 33 &&
+            MessageSender.isAccessibilityServiceEnabled(this) &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED &&
+            !prefs.getBoolean("permission_prompted", false)) {
+            prefs.edit().putBoolean("permission_prompted", true).apply()
+            AlertDialog.Builder(this)
+                .setTitle("Get auto-send alerts")
+                .setMessage("Allow notifications so QuickMsg can alert you if its accessibility service turns off. You can also enable alerts later in Settings.")
+                .setPositiveButton("Continue") { _, _ ->
+                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                .setNegativeButton("Not now", null)
+                .show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -192,6 +232,7 @@ fun MainApp(
     )
 
     Scaffold(
+        topBar = { UpdateBanner() },
         bottomBar = {
             NavigationBar {
                 navItems.forEachIndexed { index, item ->

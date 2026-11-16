@@ -3,11 +3,10 @@ package com.quickmsg.app.widget
 import android.appwidget.AppWidgetManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import com.quickmsg.app.data.WidgetRepository
 import com.quickmsg.app.service.MessageSender
 import com.quickmsg.app.service.TemplateProcessor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class WidgetClickActivity : ComponentActivity() {
@@ -28,7 +27,9 @@ class WidgetClickActivity : ComponentActivity() {
         val repo = WidgetRepository(this)
         val activity = this
 
-        CoroutineScope(Dispatchers.IO).launch {
+        // Room's suspend methods do their database work off the main thread.
+        // Keep activity launches, Toasts, and finish() on the main thread.
+        lifecycleScope.launch {
             val config = repo.getByWidgetId(widgetId)
             if (config == null) {
                 val configIntent = android.content.Intent(activity, WidgetConfigActivity::class.java).apply {
